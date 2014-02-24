@@ -11,12 +11,12 @@ describe("Adding posts", function () {
 	});
 
 	beforeEach(function (done) {
-		dbAccess.deleteAll();
+		testHelpers.deleteAll();
 		done();
 	});
 
 	after(function (done) {
-		dbAccess.deleteAll();
+		testHelpers.deleteAll();
 		done();
 	});
 

@@ -1,23 +1,8 @@
 var mongoose = require("mongoose");
-
-var Hashtag = mongoose.model("Hashtag", {
-    tag : String,
-    posts : [Post]  
-});
-
-var Reply = mongoose.model("Reply", {
-    username : String,
-    time : Date,
-    message : String
-});
-
-var Post = mongoose.model("Post", {
-    username : String,
-    time : Date,
-    message : String,
-    replies : [String],
-    hashtags : [String]
-});
+var model = require("./model.js");
+var Hashtag = model.Hashtag;
+var Reply = model.Reply;
+var Post = model.Post;
 
 var createSuccess = function (data) {
 	return {
@@ -25,7 +10,7 @@ var createSuccess = function (data) {
 		errorMessage : "",
 		data : data
 	};
-}
+};
 
 var createError = function (errorMessage) {
 	return {
@@ -33,45 +18,34 @@ var createError = function (errorMessage) {
 		errorMessage : errorMessage,
 		data : null
 	};
-}
+};
 
 var getHashTagsFromMessage = function (message) {
 	var hashs = [];
-	
+
 	var words = message.split(" ");
 	for (var i = 0; i < words.length; i++) {
 		if(words[i][0] === "#"){
 			hashs.push(words[i]);
-		};
-	};
+		}
+	}
 
 	return hashs;
 };
 
-module.exports.deleteAll = function () {
-	console.log("Deleteing all");
-	Post.remove({}, function (err) {
-		if(err) console.log(err);
-	});
-	Reply.remove({}, function (err) {
-		if(err) console.log(err);
-	});
-	Hashtag.remove({}, function (err) {
-		if(err) console.log(err);
-	});
-};
+
 
 module.exports.addPost = function (username, message, callback) {
-	if(username == "") {
+	if(username === "") {
 		callback(createError("Username is required"));
 		return;
-	};
-	
-	if(message == "") {
+	}
+
+	if(message === "") {
 		callback(createError("Message is required"));
 		return;
-	};
-	
+	}
+
 	var post = new Post();
 	post.username = username;
 	post.message = message;
@@ -81,8 +55,8 @@ module.exports.addPost = function (username, message, callback) {
 	Post.create(post, function (err, p) {
 		if(err) return err;
 
-		callback(createSuccess(p));		
-	});	
+		callback(createSuccess(p));
+	});
 };
 
 module.exports.getPostById = function (id, callback) {
@@ -90,7 +64,7 @@ module.exports.getPostById = function (id, callback) {
 		if(err){
 			callback(createError("Post '" + id + "' not found.\n" + err));
 			return;
-		};
+		}
 
 		callback(createSuccess(post));
 		return;
@@ -102,11 +76,11 @@ module.exports.getPostsByHashTag = function (hashtag, callback) {
 		if(err){
 			callback(createError("No posts found for hashtag '" + hashtag + "'"));
 			return;
-		};
+		}
 
 		callback(createSuccess(posts));
 		return;
-	});		
+	});
 };
 
 module.exports.getAllPosts = function (pageNumber, callback) {
