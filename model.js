@@ -6,9 +6,10 @@ var Hashtag = mongoose.model("Hashtag", {
 });
 
 var Reply = mongoose.model("Reply", {
+    parentPostId : String,
     username : String,
     time : Date,
-    message : String
+    message : String,
 });
 
 var Post = mongoose.model("Post", {

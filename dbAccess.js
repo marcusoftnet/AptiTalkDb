@@ -33,8 +33,6 @@ var getHashTagsFromMessage = function (message) {
 	return hashs;
 };
 
-
-
 module.exports.addPost = function (username, message, callback) {
 	if(username === "") {
 		callback(createError("Username is required"));
@@ -53,7 +51,10 @@ module.exports.addPost = function (username, message, callback) {
 	post.hashtags = getHashTagsFromMessage(message);
 
 	Post.create(post, function (err, p) {
-		if(err) return err;
+		if(err){
+			callback(err);
+			return;
+		}
 
 		callback(createSuccess(p));
 	});
@@ -90,9 +91,48 @@ module.exports.getAllPosts = function (pageNumber, callback) {
 		.sort({time: -1})
 		.exec(function (err, posts) {
 			if(err){
-				callback(createError("Error when getting all posts (page '" + pageNumber + "'\n" + err))
-			};
+				callback(createError("Error when getting all posts (page '" + pageNumber + "'\n" + err));
+			}
 
 			callback(createSuccess(posts));
 		});
+};
+
+module.exports.addReply = function (id, username, message, callback) {
+
+	if(username === "") {
+		callback(createError("Username is required"));
+		return;
+	}
+
+	if(message === "") {
+		callback(createError("Message is required"));
+		return;
+	}
+
+	var r = new Reply();
+	r.parentPostId = id;
+	r.username = username;
+	r.message = message;
+	r.time = new Date();
+
+	Reply.create(r, function (err, reply) {
+		if(err){
+			callback(err);
+			return;
+		}
+
+		Post.findByIdAndUpdate(
+			id,
+			{ $push : {replies : reply.message}},
+			{ safe : true, upsert : true},
+			function (err, post) {
+				if(err){
+					callback(err);
+					return;
+				}
+
+				callback(createSuccess(reply));
+		});
+	});
 };
