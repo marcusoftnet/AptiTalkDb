@@ -1,8 +1,12 @@
 var mongoose = require("mongoose");
+var Schema = mongoose.Schema;
 
 var Hashtag = mongoose.model("Hashtag", {
     tag : String,
-    posts : [Post]
+    posts : [{
+        type : Schema.Types.ObjectId,
+        ref : 'Post'
+    }]
 });
 
 var Reply = mongoose.model("Reply", {
@@ -16,7 +20,10 @@ var Post = mongoose.model("Post", {
     username : String,
     time : Date,
     message : String,
-    replies : [String],
+    replies : [{
+        type : Schema.Types.ObjectId,
+        ref : 'Reply'
+    }],
     hashtags : [String]
 });
 

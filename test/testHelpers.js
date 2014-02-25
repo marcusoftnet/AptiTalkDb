@@ -7,10 +7,10 @@ var Reply = model.Reply;
 var Post = model.Post;
 
 var USERNAME = "Marcus";
-var MESSAGE = "Tjaaaana!";
+var MESSAGE = "Tjäääna!";
 
 module.exports.USERNAME = USERNAME;
-module.exports.MESSAGE = "Tjaaaana!";
+module.exports.MESSAGE = MESSAGE;
 
 module.exports.connectMongo = function () {
 	if(mongoose.connection.readyState === 0) {// not open

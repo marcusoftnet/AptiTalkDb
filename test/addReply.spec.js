@@ -1,4 +1,3 @@
-// var reply = AddReply(postId, username, message)
 var mongoose = require("mongoose");
 var should = require("should");
 var dbAccess = require("../dbAccess");

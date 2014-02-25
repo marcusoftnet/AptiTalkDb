@@ -60,32 +60,40 @@ module.exports.addPost = function (username, message, callback) {
 	});
 };
 
-module.exports.getPostById = function (id, callback) {
-	Post.findOne({_id : id}, function (err, post) {
-		if(err){
-			callback(createError("Post '" + id + "' not found.\n" + err));
-			return;
-		}
+var getPostById = function (id, callback) {
+	Post
+		.findOne({_id : id})
+		.populate("replies")
+		.exec(function (err, post) {
+			if(err){
+				callback(createError("Post '" + id + "' not found.\n" + err));
+				return;
+			}
 
-		callback(createSuccess(post));
-		return;
+			callback(createSuccess(post));
+			return;
 	});
 };
+module.exports.getPostById = getPostById;
 
 module.exports.getPostsByHashTag = function (hashtag, callback) {
-	Post.find({hashtags : hashtag}, function (err, posts) {
-		if(err){
-			callback(createError("No posts found for hashtag '" + hashtag + "'"));
-			return;
-		}
+	Post
+		.find({hashtags : hashtag})
+		.populate("replies").
+		exec(function (err, posts) {
+			if(err){
+				callback(createError("No posts found for hashtag '" + hashtag + "'"));
+				return;
+			}
 
-		callback(createSuccess(posts));
-		return;
+			callback(createSuccess(posts));
+			return;
 	});
 };
 
 module.exports.getAllPosts = function (pageNumber, callback) {
 	Post.find({})
+		.populate("replies")
 		.limit(10)
 		.skip(pageNumber)
 		.sort({time: -1})
@@ -122,17 +130,71 @@ module.exports.addReply = function (id, username, message, callback) {
 			return;
 		}
 
-		Post.findByIdAndUpdate(
-			id,
-			{ $push : {replies : reply.message}},
-			{ safe : true, upsert : true},
-			function (err, post) {
+		getPostById(id, function (result) {
+			var post = result.data;
+			post.replies.push(reply);
+			post.save(function (err) {
 				if(err){
-					callback(err);
+					callback(createError("Error updateing post with reply\n" + err));
 					return;
 				}
-
 				callback(createSuccess(reply));
+			});
 		});
+	});
+};
+
+module.exports.addHashtag = function (hashtag, post, callback) {
+	if(hashtag === ""){
+		callback(createError("Hashtag is required"));
+		return;
+	}
+
+	Hashtag
+	.findOne({tag : hashtag })
+	.populate("posts")
+	.exec(function (err, hashtagFromDb) {
+		if(err) {
+			callback(createError("Error creating hashtag\n" + err));
+			return;
+		}
+		if(hashtagFromDb === null) {
+			var h = new Hashtag();
+			h.tag = hashtag;
+			h.posts = [post];
+			Hashtag.create(h, function (err, hash) {
+				if(err){
+					callback(createError("Error creating hashtag\n" + err));
+					return;
+				}
+				callback(createSuccess(hash));
+			});
+		}
+		else {
+			hashtagFromDb.posts.push(post);
+			hashtagFromDb.save(function (err) {
+				if(err){
+					callback(createError("Error creating hashtag\n" + err));
+					return;
+				}
+				callback(createSuccess(hashtagFromDb));
+				return;
+			});
+		}
+	});
+};
+
+module.exports.getHashtag = function (hashtag, callback) {
+	Hashtag
+	.findOne({tag : hashtag })
+	.populate("posts")
+	.exec(function (err, hash) {
+		if(err) {
+			callback(createError("Error creating hashtag\n" + err));
+			return;
+		}
+
+		callback(createSuccess(hash));
+		return;
 	});
 };
