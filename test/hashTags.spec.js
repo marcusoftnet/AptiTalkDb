@@ -72,7 +72,23 @@ describe("Hashtags", function () {
 		});
 	});
 	describe("get hashtag", function () {
-		it("by name");
-		it("throws error for non-existing");
+		it("by name", function (done) {
+			addTestPostAndHashtag("#tjäääääna", function (result) {
+				testHelpers.validateOkResult(result);
+
+				dbAccess.getHashtag("#tjäääääna", function (result) {
+					testHelpers.validateOkResult(result);
+					result.data.posts.length.should.equal(1);
+					result.data.tag.should.equal("#tjäääääna");
+					done();
+				});
+			});
+		});
+		it("throws error for non-existing", function (done) {
+			dbAccess.getHashtag("#tjäääääna", function (result) {
+				testHelpers.validateErrorResult(result, "Hashtag '#tjäääääna' not found");
+				done();
+			});
+		});
 	});
 });

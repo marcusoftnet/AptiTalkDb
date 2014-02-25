@@ -190,7 +190,12 @@ module.exports.getHashtag = function (hashtag, callback) {
 	.populate("posts")
 	.exec(function (err, hash) {
 		if(err) {
-			callback(createError("Error creating hashtag\n" + err));
+			callback(createError("Error getting hashtag\n" + err));
+			return;
+		}
+
+		if(hash === null){
+			callback(createError("Hashtag '" + hashtag + "' not found"));
 			return;
 		}
 
