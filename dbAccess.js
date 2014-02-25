@@ -20,20 +20,20 @@ var createError = function (errorMessage) {
 	};
 };
 
-var getHashTagsFromMessage = function (message) {
-	var hashs = [];
+// var getHashTagsFromMessage = function (message) {
+// 	var hashs = [];
 
-	var words = message.split(" ");
-	for (var i = 0; i < words.length; i++) {
-		if(words[i][0] === "#"){
-			hashs.push(words[i]);
-		}
-	}
+// 	var words = message.split(" ");
+// 	for (var i = 0; i < words.length; i++) {
+// 		if(words[i][0] === "#"){
+// 			hashs.push(words[i]);
+// 		}
+// 	}
 
-	return hashs;
-};
+// 	return hashs;
+// };
 
-module.exports.addPost = function (username, message, callback) {
+module.exports.addPost = function (username, message, hashtagParser, callback) {
 	if(username === "") {
 		callback(createError("Username is required"));
 		return;
@@ -48,7 +48,7 @@ module.exports.addPost = function (username, message, callback) {
 	post.username = username;
 	post.message = message;
 	post.time = new Date();
-	post.hashtags = getHashTagsFromMessage(message);
+	post.hashtags = hashtagParser(message);
 
 	Post.create(post, function (err, p) {
 		if(err){

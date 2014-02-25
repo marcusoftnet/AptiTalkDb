@@ -50,7 +50,7 @@ module.exports.deleteAll = function () {
 };
 
 var addTestPost = function (username, message, cb) {
-	dbAccess.addPost(username, message, function (result) {
+	dbAccess.addPost(username, message, getHashTagsFromMessage, function (result) {
 		validateOkResult(result);
 		cb(result);
 	});
@@ -62,3 +62,17 @@ module.exports.addTestPosts = function (numberOfPosts, callback) {
 		addTestPost(USERNAME, MESSAGE + " " + (i + 1), callback);
 	}
 };
+
+var getHashTagsFromMessage = function (message) {
+	var hashs = [];
+
+	var words = message.split(" ");
+	for (var i = 0; i < words.length; i++) {
+		if(words[i][0] === "#"){
+			hashs.push(words[i]);
+		}
+	}
+
+	return hashs;
+};
+module.exports.getHashTagsFromMessage = getHashTagsFromMessage;
